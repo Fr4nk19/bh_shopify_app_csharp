@@ -15,19 +15,16 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
 #pragma warning disable 612, 618
         modelBuilder
             .HasAnnotation("ProductVersion", "8.0.6")
-            .HasAnnotation("Relational:MaxIdentifierLength", 63);
-
-        Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal
-            .NpgsqlAnnotationProvider.SetPostgresVersion(modelBuilder, 14, 0);
+            .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
         modelBuilder.Entity("BhShopifyApp.Models.ShopSession", b =>
         {
-            b.Property<string>("Id").HasColumnType("text");
-            b.Property<string>("Shop").IsRequired().HasMaxLength(255).HasColumnType("character varying(255)");
-            b.Property<string>("AccessToken").IsRequired().HasColumnType("text");
-            b.Property<string>("Scopes").IsRequired().HasColumnType("text");
-            b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
-            b.Property<DateTime>("UpdatedAt").HasColumnType("timestamp with time zone");
+            b.Property<string>("Id").HasColumnType("nvarchar(450)");
+            b.Property<string>("Shop").IsRequired().HasMaxLength(255).HasColumnType("nvarchar(255)");
+            b.Property<string>("AccessToken").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("Scopes").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
+            b.Property<DateTime>("UpdatedAt").HasColumnType("datetime2");
             b.HasKey("Id");
             b.HasIndex("Shop").IsUnique();
             b.ToTable("Sessions");
@@ -35,19 +32,75 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("BhShopifyApp.Models.ShopSettings", b =>
         {
-            b.Property<string>("Id").HasColumnType("text");
-            b.Property<string>("Shop").IsRequired().HasMaxLength(255).HasColumnType("character varying(255)");
-            b.Property<string>("ErpBaseUrl").IsRequired().HasColumnType("text");
-            b.Property<string>("ErpApiKey").IsRequired().HasColumnType("text");
-            b.Property<string>("ErpApiHeader").IsRequired().HasDefaultValue("X-Api-Key").HasColumnType("text");
-            b.Property<bool>("SyncEnabled").HasDefaultValue(true).HasColumnType("boolean");
-            b.Property<int>("SyncIntervalMinutes").HasDefaultValue(15).HasColumnType("integer");
-            b.Property<DateTime?>("LastSyncAt").HasColumnType("timestamp with time zone");
-            b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone");
-            b.Property<DateTime>("UpdatedAt").HasColumnType("timestamp with time zone");
+            b.Property<string>("Id").HasColumnType("nvarchar(450)");
+            b.Property<string>("Shop").IsRequired().HasMaxLength(255).HasColumnType("nvarchar(255)");
+            b.Property<string>("ErpBaseUrl").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("ErpApiKey").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("ErpApiHeader").IsRequired().HasDefaultValue("X-Api-Key").HasColumnType("nvarchar(max)");
+            b.Property<bool>("SyncEnabled").HasDefaultValue(true).HasColumnType("bit");
+            b.Property<int>("SyncIntervalMinutes").HasDefaultValue(15).HasColumnType("int");
+            b.Property<DateTime?>("LastSyncAt").HasColumnType("datetime2");
+            b.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
+            b.Property<DateTime>("UpdatedAt").HasColumnType("datetime2");
             b.HasKey("Id");
             b.HasIndex("Shop").IsUnique();
             b.ToTable("ShopSettings");
+        });
+
+        modelBuilder.Entity("BhShopifyApp.Models.ProductMapping", b =>
+        {
+            b.Property<string>("Id").HasColumnType("nvarchar(450)");
+            b.Property<string>("Shop").IsRequired().HasMaxLength(255).HasColumnType("nvarchar(255)");
+            b.Property<string>("ShopifyProductId").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("ShopifyVariantId").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("ShopifyInventoryItemId").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("ShopifyLocationId").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("ProductTitle").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("VariantTitle").HasColumnType("nvarchar(max)");
+            b.Property<string>("ErpSku").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<bool>("SyncEnabled").HasDefaultValue(false).HasColumnType("bit");
+            b.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
+            b.Property<DateTime>("UpdatedAt").HasColumnType("datetime2");
+            b.HasKey("Id");
+            b.ToTable("ProductMappings");
+        });
+
+        modelBuilder.Entity("BhShopifyApp.Models.SyncLog", b =>
+        {
+            b.Property<string>("Id").HasColumnType("nvarchar(450)");
+            b.Property<string>("Shop").IsRequired().HasMaxLength(255).HasColumnType("nvarchar(255)");
+            b.Property<int>("Direction").HasColumnType("int");
+            b.Property<int>("Status").HasColumnType("int");
+            b.Property<string>("Source").IsRequired().HasColumnType("nvarchar(max)");
+            b.Property<string>("ErpSku").HasColumnType("nvarchar(max)");
+            b.Property<string>("ShopifyVariantId").HasColumnType("nvarchar(max)");
+            b.Property<int?>("QuantityBefore").HasColumnType("int");
+            b.Property<int?>("QuantityAfter").HasColumnType("int");
+            b.Property<string>("ErrorMessage").HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
+            b.HasKey("Id");
+            b.ToTable("SyncLogs");
+        });
+
+        modelBuilder.Entity("BhShopifyApp.Models.SyncQueue", b =>
+        {
+            b.Property<string>("Id").HasColumnType("nvarchar(450)");
+            b.Property<string>("Shop").IsRequired().HasMaxLength(255).HasColumnType("nvarchar(255)");
+            b.Property<int>("Direction").HasColumnType("int");
+            b.Property<string>("ErpSku").HasColumnType("nvarchar(max)");
+            b.Property<string>("ShopifyVariantId").HasColumnType("nvarchar(max)");
+            b.Property<string>("ShopifyLocationId").HasColumnType("nvarchar(max)");
+            b.Property<int?>("Quantity").HasColumnType("int");
+            b.Property<int>("Attempts").HasDefaultValue(0).HasColumnType("int");
+            b.Property<int>("MaxAttempts").HasDefaultValue(3).HasColumnType("int");
+            b.Property<int>("Status").HasDefaultValue(0).HasColumnType("int");
+            b.Property<string>("ErrorMessage").HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("ScheduledAt").HasColumnType("datetime2");
+            b.Property<DateTime?>("ProcessedAt").HasColumnType("datetime2");
+            b.Property<DateTime>("CreatedAt").HasColumnType("datetime2");
+            b.Property<DateTime>("UpdatedAt").HasColumnType("datetime2");
+            b.HasKey("Id");
+            b.ToTable("SyncQueues");
         });
 #pragma warning restore 612, 618
     }
