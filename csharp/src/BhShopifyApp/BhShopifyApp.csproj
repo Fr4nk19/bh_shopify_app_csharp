@@ -14,10 +14,10 @@
     <PackageReference Include="ShopifySharp" Version="6.9.0" />
     <PackageReference Include="ShopifySharp.Extensions.DependencyInjection" Version="1.1.0" />
 
-    <!-- EF Core + PostgreSQL -->
+    <!-- EF Core + SQL Server -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
 
     <!-- Cron (Quartz.NET) -->
     <PackageReference Include="Quartz.AspNetCore" Version="3.13.0" />

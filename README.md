@@ -8,7 +8,7 @@ construida con el patrón de **Inyección de Dependencias** de ASP.NET Core.
 | Capa | Tecnología |
 |------|-----------|
 | Web framework | ASP.NET Core 8 (Razor Pages + MVC Controllers) |
-| ORM | Entity Framework Core 8 con PostgreSQL (Npgsql) |
+| ORM | Entity Framework Core 8 con SQL Server |
 | HTTP client | `IHttpClientFactory` + Resilience (Polly) |
 | Cron jobs | Quartz.NET 3 |
 | Shopify Auth | ShopifySharp |
@@ -29,7 +29,7 @@ El registro se organiza en **extension methods** por responsabilidad:
 ```csharp
 // Program.cs — composition root limpio
 builder.Services
-    .AddDatabase(config)       // EF Core + PostgreSQL
+    .AddDatabase(config)       // EF Core + SQL Server
     .AddErpServices(config)    // IErpService + typed HttpClient
     .AddShopifyServices()      // IShopifyInventoryService + typed HttpClient
     .AddSyncServices()         // ISyncService
@@ -76,30 +76,77 @@ csharp/
 ## Requisitos
 
 - .NET 8 SDK
-- PostgreSQL 14+
+- SQL Server (Express, Developer Edition o Docker)
 - Cuenta Shopify Partners
 
-## Setup
+## Setup Local para Pruebas
+
+### Opción A — SQL Server con Docker (recomendado, multiplataforma)
+
+```bash
+# 1. Levantar SQL Server en Docker
+docker run -e "ACCEPT_EULA=Y" \
+           -e "SA_PASSWORD=YourStrong@Passw0rd" \
+           -p 1433:1433 \
+           --name sqlserver \
+           -d mcr.microsoft.com/mssql/server:2022-latest
+
+# 2. Verificar que está corriendo
+docker ps
+```
+
+Cadena de conexión para Docker (usuario `sa`):
+```
+Server=localhost,1433;Database=BhShopifyApp;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+```
+
+### Opción B — SQL Server Express / Developer Edition (Windows)
+
+Descarga gratuita: https://www.microsoft.com/en-us/sql-server/sql-server-downloads
+
+Con Windows Authentication (sin usuario/contraseña):
+```
+Server=localhost;Database=BhShopifyApp;Trusted_Connection=true;TrustServerCertificate=true;
+```
+
+Con SQL Authentication:
+```
+Server=localhost;Database=BhShopifyApp;User Id=sa;Password=TuPassword;TrustServerCertificate=true;
+```
+
+---
+
+### Instalación y ejecución
 
 ```bash
 # 1. Restaurar dependencias
 cd csharp
 dotnet restore
 
-# 2. Configurar User Secrets (desarrollo)
+# 2. Configurar User Secrets (desarrollo local)
 cd src/BhShopifyApp
-dotnet user-secrets set "Shopify:ApiKey"        "your_key"
-dotnet user-secrets set "Shopify:ApiSecret"     "your_secret"
-dotnet user-secrets set "Sync:WebhookSecret"    "your_secret"
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
-    "Host=localhost;Database=bh_shopify_app;Username=postgres;Password=postgres"
+dotnet user-secrets set "Shopify:ApiKey"     "your_key"
+dotnet user-secrets set "Shopify:ApiSecret"  "your_secret"
+dotnet user-secrets set "Sync:WebhookSecret" "your_secret"
 
-# 3. Ejecutar migraciones
+# Si usas Docker/SQL Auth, sobreescribe la cadena de conexión:
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
+  "Server=localhost,1433;Database=BhShopifyApp;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;"
+
+# 3. Crear la base de datos y ejecutar migraciones
 dotnet ef database update
 
-# 4. Iniciar
+# 4. Iniciar la app
 dotnet run
+# → https://localhost:5001
 ```
+
+> **Nota:** Si no tienes `dotnet-ef` instalado:
+> ```bash
+> dotnet tool install --global dotnet-ef
+> ```
+
+---
 
 ## Endpoints del ERP Esperados
 

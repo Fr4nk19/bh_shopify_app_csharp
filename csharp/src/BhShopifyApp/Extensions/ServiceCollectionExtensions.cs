@@ -16,13 +16,13 @@ public static class ServiceCollectionExtensions
 {
     // ── Database ──────────────────────────────────────────────────────────────
 
-    /// <summary>Registers EF Core with PostgreSQL.</summary>
+    /// <summary>Registers EF Core with SQL Server.</summary>
     public static IServiceCollection AddDatabase(
         this IServiceCollection services, IConfiguration config)
     {
         services.AddDbContext<AppDbContext>(opts =>
-            opts.UseNpgsql(config.GetConnectionString("DefaultConnection"),
-                npg => npg.EnableRetryOnFailure(3)));
+            opts.UseSqlServer(config.GetConnectionString("DefaultConnection"),
+                sql => sql.EnableRetryOnFailure(3)));
 
         return services;
     }
